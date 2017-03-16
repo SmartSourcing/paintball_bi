@@ -1,0 +1,18 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  username: paintballapi
+  password:
+
+development:
+  <<: *default
+  database: paintballBi
+
+test:
+  <<: *default
+  database: paintballBiTest
+
+production:
+  <<: *default
+  database: paintballBiTestProd

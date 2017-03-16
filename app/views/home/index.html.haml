@@ -1,0 +1,140 @@
+%h2
+  Data
+  %select
+    %option{ value: 'marker' } Marker
+  %hr
+  %br
+%script{:type=>"text/javascript", src: 'https://www.google.com/jsapi'}
+#regions_div{style: "width: 600px; height: 550px; position:relative; top:-20px;"}
+#country_div{style: "width: 700px; height: 430px; float: right; position:relative; top:-500px;overflow-y:scroll;"}
+#clusters_div{style: "width: 600px; height: 500px; clear: left;position:relative; top:-20px;"}
+  %b
+    %span{ id: 'total_markers' } Clusters selected for campaign (0)
+  %hr
+  %clusters{ id: 'clusters' }
+  %br
+  %br
+#campaign_div{style: "width: 700px; height: 500px; float: right; position:relative;top:-600px;"}
+
+:javascript
+
+  clusters = [];
+  total_cluster_markers = 0;
+  data     = #{raw @data.to_a};
+  chart    = null;
+  data.splice(0,0,['Country', 'Markers'])
+
+  google.load("visualization", "1", {packages:["geochart"]});
+  google.setOnLoadCallback(draw_countries);
+
+  function startAjax()
+  {
+    $('body').css('opacity', '0.5');
+    $(".spinner").show();
+  }
+
+  function stopAjax()
+  {
+    $(".spinner").hide();
+    $('body').css('opacity', '1');
+  }
+
+  function region_selection()
+  {
+    row = chart.getSelection()[0].row + 1;
+    country = data[row][0];
+    list_country_markers(country);
+  }
+
+  function draw_countries()
+  {
+      startAjax();
+      var chart_data = google.visualization.arrayToDataTable(data);
+      var options = {};
+
+      chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+      chart.draw(chart_data, options);
+      google.visualization.events.addListener(chart, 'select', region_selection);
+
+      stopAjax();
+  }
+
+  function list_country_markers(country)
+  {
+    startAjax();
+    $.ajax(
+    {
+      type: "GET",
+      url: "#{admin_campaign_markers_by_country_path}",
+      data: {country: country},
+      contentType: "application/html",
+      dataType: "html"
+    }).done(function(response)
+    {
+      $('#country_div').html(response)
+      stopAjax();
+    });
+  }
+
+  function list_total_markers(country,manufacturer)
+  {
+    if ( $("#"+manufacturer.replace(' ','')).find('div').css('display') == "block" )
+    {
+      $("#"+manufacturer.replace(' ','')).find('div').hide();
+    }
+    else
+    {
+      startAjax();
+      $.ajax(
+      {
+        type: "GET",
+        url: "#{admin_campaign_markers_expanded_path}",
+        data: {country: country, manufacturer: manufacturer},
+        contentType: "application/html",
+        dataType: "html"
+      }).done(function(response)
+      {
+        $("#"+manufacturer.replace(' ','')).find('div').html(response);
+        $("#"+manufacturer.replace(' ','')).find('div').show();
+        stopAjax();
+      });
+    }
+  }
+
+  function add_to_campaign(country,manofacturer, amount)
+  {
+    cluster = { country: country, manofacturer: manofacturer , amount: amount}
+    clusters.push(cluster);
+    render_clusters();
+  }
+
+  function render_clusters()
+  {
+    $("#clusters_div").find('clusters').html('');
+
+    for (index in clusters)
+    {
+      cluster = clusters[index];
+      span    = $("<span style='font-size:14px;font-weight: bold;'><span>");
+      br      = $('<br/>');
+
+      total_cluster_markers = total_cluster_markers + cluster['amount'];
+      span.html("<li>Country: " + cluster['country'] + " Manofacturer: " + cluster['manofacturer'] + " Amount: " + cluster['amount'] + "</li>" );
+      $("#clusters_div").find('clusters').append(span);
+      $("#clusters_div").find('clusters').append(br);
+    }
+
+    $('#total_markers').html('Clusters selected for campaign (' + total_cluster_markers + ')' );
+  }
+
+  function send_campagin()
+  {
+    if ( clusters.length == 0 )
+    {
+      alert ('You need to chose some targets for this campaign!');
+      return false;
+    }
+
+    $('#campaign_clusters').val(JSON.stringify(clusters));
+    $('#new_campaign').submit();
+  }
