@@ -1,0 +1,10 @@
+%li{class: 'nav-header'}
+  = "#{@country}"
+%br
+%ul
+  - @manufacturers.each do |manufacturer|
+    %li
+      %a{ href: "#", onclick: "olap.markers('#{@country}','#{manufacturer[0]}');" }
+        = "#{manufacturer[0]}: #{manufacturer[1]}".html_safe
+      %div{ id:"#{manufacturer[0].gsub(' ','')}" }
+

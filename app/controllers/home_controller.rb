@@ -1,36 +1,33 @@
 require 'olap'
 
 class HomeController < ApplicationController
+  before_action :olap
+  layout 'application', only: :index
+
   def index
 
-    bi    = Olap::Bi::Paintball.new
-    @data = bi.by_model_by_manfacturer('all','all')
+    @markers = @bi.by_country('all')
+  end
 
-=begin
+  def show
+    @country        = params[:country]
+    country         = TZInfo::Country.all.select {|c| c.name == params[:country]}.first.try(:code) || 'AR'
+    @manufacturers  = @bi.by_country_and_manufacturer(country)
 
-def markers_model_by_country_and_manufacturer
+    render layout: false
+  end
 
-        country       = "[Nationalities].[#{params[:country]}]"
-        manufacterer  = "[Manufacturers].[#{params[:manufacturer]}]"
+  def list
+    country      = TZInfo::Country.all.select {|c| c.name == params[:country]}.first.try(:code) || 'AR'
+    manufacturer = params[:manufacturer]
 
-        q = @@connection.from('Gears').
-            columns('[Measures].[Markers]').
-            rows('[Markers].children').
-            crossjoin(manufacterer).
-            crossjoin(country).
-            nonempty()
+    @markers  = @bi.by_country_and_manufacturer_and_marker(country, manufacturer)
+    render layout: false
+  end
 
-        puts "query: #{q.to_mdx}"
+  private
 
-        r = q.execute
-        result = []
-        result << r.axis_full_names[1]
-        result << r.values
-
-        render json: { status: 'ok', data: result }
-      end
-
-=end
-
+  def olap
+    @bi = Olap::Bi::Paintball.new
   end
 end

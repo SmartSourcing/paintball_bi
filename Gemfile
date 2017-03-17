@@ -11,17 +11,16 @@ gem 'faker', '~> 1.6.1'
 gem 'carrierwave'
 gem 'rmagick4j', require: 'RMagick'
 gem 'fog'
-gem 'therubyrhino'  # If using JRuby
-gem 'less-rails-bootstrap'
-# Country select
+gem 'therubyrhino'
+gem "twitter-bootstrap-rails"
 gem 'country_select', '~> 2.5.1'
 gem 'haml'
+gem 'coffee-rails', '~> 4.0.0'
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
   gem 'sass-rails', '~> 4.0.3'
-  gem 'coffee-rails', '~> 4.0.0'
   gem 'uglifier', '>= 1.3.0'
 end
 
