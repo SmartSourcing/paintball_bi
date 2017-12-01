@@ -16,6 +16,34 @@ ActiveRecord::Schema.define(version: 20170315120659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "add_photo", id: false, force: true do |t|
+    t.string   "id",                      limit: 1024, null: false
+    t.datetime "received_at"
+    t.datetime "uuid_ts"
+    t.text     "album_id"
+    t.text     "album_name"
+    t.text     "booth_id"
+    t.text     "brand_name"
+    t.text     "context_library_name"
+    t.text     "context_library_version"
+    t.text     "email"
+    t.text     "event"
+    t.text     "event_text"
+    t.text     "name"
+    t.datetime "original_timestamp"
+    t.text     "photo"
+    t.datetime "sent_at"
+    t.datetime "timestamp"
+    t.text     "user_id"
+    t.text     "segment_object_id"
+    t.text     "in_store_date"
+    t.integer  "photo_count",             limit: 8
+    t.boolean  "photo_credits"
+    t.text     "photo_group"
+    t.text     "photo_type"
+    t.text     "upload_method"
+  end
+
   create_table "gears", force: true do |t|
     t.string   "category",        null: false
     t.string   "name",            null: false
